@@ -5,6 +5,7 @@ import numpy as np
 from pyzbar.pyzbar import decode
 
 def connect_to_arduino(port, baud_rate=9600, simulate=False):
+    # Connect to Arduino via serial port, or simulate
     if simulate:
         return None
     try:
@@ -12,18 +13,20 @@ def connect_to_arduino(port, baud_rate=9600, simulate=False):
     except serial.SerialException as e:
         print(f"Failed to connect on {port}: {e}")
         exit(1)
+        
 def send_command(ser, command):
+    # Send a command to Arduino, or simulate
     if ser is None:
         print(f"Simulated command: {command}")
         return
     try:
-        ser.write((command + '\n').encode())  # Ensure the command ends with a newline
+        ser.write((command + '\n').encode())
         print(f"Sent '{command}' to Arduino")
     except serial.SerialException as e:
         print(f"Error sending data: {e}")
         exit(1)
 
-# The QR code value you want to match
+# QR code value
 target_qr_code = "https://example.com"
 cv2_reader = cv2.QRCodeDetector()
 cap = cv2.VideoCapture(1)
@@ -38,6 +41,7 @@ try:
             break
 
         try:
+            # Detect and decode the QR code in the frame
             cv2_out, cord, _ = cv2_reader.detectAndDecode(frame)
             if cv2_out == target_qr_code:
                 cord = cord.tolist()[0]
@@ -66,7 +70,7 @@ try:
                 elif mid_x > 750:
                     send_command(ser, "right")
                 
-
+                # Draw circle at midpoint and rectangle around QR code
                 cv2.circle(frame, (mid_x, mid_y), 5, (0, 0, 255), 5)
                 cv2.rectangle(frame, top_left, bottom_right, (0, 255, 0), 2)
 
@@ -74,10 +78,12 @@ try:
             print(f"Error decoding QR code: {e}")
             pass
 
+        # Display the resulting frame
         cv2.imshow('QR Code Scanner', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
 finally:
+    # Release the capture and close any OpenCV windows
     cap.release()
     cv2.destroyAllWindows()
