@@ -12,7 +12,6 @@ def connect_to_arduino(port, baud_rate=9600, simulate=False):
     except serial.SerialException as e:
         print(f"Failed to connect on {port}: {e}")
         exit(1)
-
 def send_command(ser, command):
     if ser is None:
         print(f"Simulated command: {command}")
